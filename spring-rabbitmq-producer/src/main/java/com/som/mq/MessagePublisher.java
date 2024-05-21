@@ -6,18 +6,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-import java.util.UUID;
-
 @RestController
 public class MessagePublisher {
 
     @Autowired private RabbitTemplate template;
-    @PostMapping("/publish")
-    public String publishMessage(@RequestBody CustomMessage customMessage){
-        customMessage.setMessageId(UUID.randomUUID().toString());
-        customMessage.setMessageDt(new Date());
-        template.convertAndSend(MQConfig.EXCHANGE, MQConfig.ROUTING_KEY, customMessage);
+    @PostMapping("/user")
+    public String publishMessage(@RequestBody UserRegistrationRequest userRegistrationRequest){
+        template.convertAndSend("x.user-registration","user-registration", userRegistrationRequest);
         return "Message Published";
     }
 }

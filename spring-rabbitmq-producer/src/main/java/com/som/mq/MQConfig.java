@@ -12,25 +12,20 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MQConfig {
-    public static final String QUEUE = "message_queue";
-    public static final String EXCHANGE = "message_exchange";
-    public static final String ROUTING_KEY = "routing_key";
-
     @Bean
-    public Queue queue(){
-        return new Queue(QUEUE);
+    public Declarables createPostRegistrationSchema(){
+        return new Declarables(new FanoutExchange("x.post-registration"),
+                new Queue("q.send-email"),
+                new Queue("q.send-sms"),
+                new Binding("q.send-email", Binding.DestinationType.QUEUE, "x.post-registration", "send-email", null),
+                new Binding("q.send-sms", Binding.DestinationType.QUEUE, "x.post-registration", "send-sms", null));
     }
-
-    @Bean
-    public TopicExchange exchange(){
-        return new TopicExchange(EXCHANGE);
-    }
-
-    @Bean
-    public Binding binding(Queue queue, TopicExchange exchange){
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
-    }
-
+@Bean
+public Declarables createUserRegistrationQueue(){
+    return new Declarables(new TopicExchange("x.user-registration"),
+            new Queue("q.user-registration"),
+            new Binding("q.user-registration", Binding.DestinationType.QUEUE, "x.user-registration","user-registration", null));
+}
     @Bean
     public MessageConverter messageConverter(){
         return new Jackson2JsonMessageConverter();
